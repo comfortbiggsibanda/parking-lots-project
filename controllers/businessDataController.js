@@ -35,53 +35,25 @@ const upload = multer({
   fileFilter: multerFilter
 });
 
-const saveFileToFolder = catchAsync(async (req, res, next) => {
-  console.log('running')
-  if (!req.file) return next();
-
-  //console.log('req.file: ', req.file)
-
-  req.file.originalname = 'myParkingLotData.csv';
-
-  console.log('req.file: ', req.file)
-
-  //await sharp(req.file.buffer)
-
-  // req.file.mv(`../csvData/csvFiles/`, req.file.originalname, function (err){
-  //   if(err)
-  //   {
-  //     console.log(err)
-  //     res.send(err)
-  //   }else{
-  //     console.log('success')
-  //     res.send('file saved')
-  //   }
-  // })
-
-   
-
-  next();
-});
 
 
-// const saveToDataBase = async (req, res) => {
-//   //loading, reading and saving file details to database
-//   const parser = parse({columns: true, delimiter: ';'}, async function (err, records){
-//     console.log(records);
+const saveToDataBase = async (req, res) => {
+  //loading, reading and saving file details to database
+  const parser = parse({columns: true, delimiter: ';'}, async function (err, records){
+    console.log(records);
 
-//       try {
-//           await BusinessData.create(records);
-//           console.log('Data successfully loaded!');
-//         } catch (err) {
-//           console.log(err);
-//         }
-//   });
+      try {
+          await BusinessData.create(records);
+          console.log('Data successfully loaded!');
+        } catch (err) {
+          console.log(err);
+        }
+  });
 
-//   fs.createReadStream(__dirname + `/csvData/csvFiles/${req.file.originalname}`).pipe(parser);
-// }
+  fs.createReadStream(__dirname + `/csvData/csvFiles/${req.file.originalname}`).pipe(parser);
+}
 
 exports.uploadCsvFile = upload.single('file');
-exports.saveFileLocally = saveFileToFolder;
 
 // exports.createCandidate = factory.createOne(Candidate)
 // exports.getCandidate = factory.getOne(Candidate, 'evaluations');
