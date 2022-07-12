@@ -5,14 +5,22 @@ const CsvFile = require('../csvData/csvFileLoad');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
-const fileUpload = require('express-fileupload')
+//const fileUpload = require('express-fileupload')
 
 const fs = require('fs'); 
 const { parse } = require('csv-parse');
 
 
 //logic to handle csv file uploads 
-const multerStorage = multer.memoryStorage();
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'csvData/csvFiles');
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split('/')[1];
+    cb(null, `myParkingLotData.${ext}`);
+  }
+});
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.includes('csv')) {
@@ -28,6 +36,7 @@ const upload = multer({
 });
 
 const saveFileToFolder = catchAsync(async (req, res, next) => {
+  console.log('running')
   if (!req.file) return next();
 
   //console.log('req.file: ', req.file)
@@ -36,9 +45,20 @@ const saveFileToFolder = catchAsync(async (req, res, next) => {
 
   console.log('req.file: ', req.file)
 
-  await sharp(req.file.buffer)
+  //await sharp(req.file.buffer)
 
-    .toFile(`csvData/csvFiles/${req.file.originalname}`);
+  // req.file.mv(`../csvData/csvFiles/`, req.file.originalname, function (err){
+  //   if(err)
+  //   {
+  //     console.log(err)
+  //     res.send(err)
+  //   }else{
+  //     console.log('success')
+  //     res.send('file saved')
+  //   }
+  // })
+
+   
 
   next();
 });

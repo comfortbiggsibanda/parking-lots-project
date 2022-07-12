@@ -6,8 +6,6 @@ const router = express.Router();
 
 router.post('/upload', BusinessDataController.uploadCsvFile, BusinessDataController.saveFileLocally, (req, res) => {
 
-    req.file.originalname = 'myParkinglotData.csv'
-
     res.send('hi there')
 } );
 

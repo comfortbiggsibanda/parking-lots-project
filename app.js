@@ -1,7 +1,9 @@
 const express = require('express');
+const path = require('path');
 const bodyParser = require('body-parser');
-//const path = require('path');
-//const fileUpload = require('express-fileupload')
+const fileUpload = require('express-fileupload')
+
+const businessDataRouter = require('./routes/businessDataRoute');
 
 
 
@@ -9,12 +11,14 @@ const bodyParser = require('body-parser');
 // Start express app
 const app = express();
 
+//app.use(fileUpload());
 app.use(bodyParser.json());
-//app.use(fileUpload)
 
-const businessDataRouter = require('./routes/businessDataRoute');
-// // Serving static files
-// app.use(express.static(path.join(__dirname, 'csvData')));
+// Serving static files
+app.use(express.static(path.join(__dirname, 'csvData')));
+
+
+
 
 
 
