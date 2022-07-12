@@ -21,9 +21,11 @@ const businessDataSchema = new mongoose.Schema({
     },
     value: {
       type: Number,
+      default: 0,
     },
     discountInCents: {
         type: Number,
+        default: 0,
       },
     createdAt: {
       type: Date,

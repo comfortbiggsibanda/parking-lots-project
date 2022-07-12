@@ -3,9 +3,7 @@ const BusinessData = require('../models/businessDataModel');
 const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
-const factory = require('./handlerFactory');
 const APIFeatures = require('./../utils/apiFeatures');
-//const fileUpload  = require('express-fileupload')
 
 
 const fs = require('fs'); 
@@ -56,8 +54,6 @@ const saveToDataBase = async (req, res) => {
 
   fs.createReadStream(pathToFile).pipe(parser);
 
-  res.status
-
   // SENDING RESPONSE
   res.status(201).json({
     status: 'success',
@@ -69,16 +65,34 @@ const saveToDataBase = async (req, res) => {
  const getAllCarsOnParkinglot = catchAsync(async (req, res, next) => {
 
     let parkinglotId = req.params.id.toString();
+    let timeElapsed = parseInt(req.params.T);
+
+    let costPerHour = 1.20;
+    let discount = 0.10;
+    let totalCost;
+    let discountToCents = 0;
+
+    if(timeElapsed < 4)
+    {
+      totalCost = (timeElapsed * costPerHour).toFixed(2);
+    } else if(timeElapsed > 3)
+    {
+      let hourDifference = timeElapsed - 3;
+      discount *= hourDifference;
+      discountToCents = discount * 100;
+      totalCost = (timeElapsed * costPerHour) - discount;
+    }
 
     let filter = {parkinglotId};
-    //if (req.params.tourId) filter = { tour: req.params.tourId };
+
+    await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
 
     const features = new APIFeatures(BusinessData.find(filter), req.query)
       .filter()
       .sort()
       .limitFields()
       .paginate();
-    // const doc = await features.query.explain();
+ 
     const doc = await features.query;
 
     // SEND RESPONSE
@@ -92,11 +106,52 @@ const saveToDataBase = async (req, res) => {
     });
   });
 
+
+  // getting all the money a user is making across all parking lots
+ const getInventory = catchAsync(async (req, res, next) => {
+
+  let timeElapsed = parseInt(req.params.T);
+
+  let costPerHour = 1.20;
+  let discount = 0.10;
+  let totalCost;
+  let discountToCents = 0;
+
+  if(timeElapsed < 4)
+  {
+    totalCost = (timeElapsed * costPerHour).toFixed(2);
+  } else if(timeElapsed > 3)
+  {
+    let hourDifference = timeElapsed - 3;
+    discount *= hourDifference;
+    discountToCents = discount * 100;
+    totalCost = (timeElapsed * costPerHour) - discount;
+  }
+
+  await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
+
+  let filter = {};
+
+  const features = new APIFeatures(BusinessData.find(filter), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const doc = await features.query;
+
+  // SEND RESPONSE
+  res.status(200).json({
+    status: 'success',
+    results: doc.length,
+    data: {
+      data: doc
+    }
+   
+  });
+});
+
 exports.uploadCsvFile = upload.single('file');
 exports.saveToDataBase = saveToDataBase;
 exports.getAllCarsOnParkinglot = getAllCarsOnParkinglot;
-
-// exports.createCandidate = factory.createOne(Candidate)
-// exports.getCandidate = factory.getOne(Candidate, 'evaluations');
-// exports.getAllCandidates = factory.getAll(Candidate);
-// exports.deleteCandidate = factory.deleteOne(Candidate);
+exports.getInventory = getInventory;
