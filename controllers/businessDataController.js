@@ -4,14 +4,15 @@ const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
-const fileUpload  = require('express-fileupload')
+const APIFeatures = require('./../utils/apiFeatures');
+//const fileUpload  = require('express-fileupload')
 
 
 const fs = require('fs'); 
 const { parse } = require('csv-parse');
 
 
-//logic to handle csv file uploads 
+//multer logic to handle csv file uploads 
 const multerStorage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'csvData/csvFiles');
@@ -36,12 +37,10 @@ const upload = multer({
 });
 
 
-
+//saving csv file contents to Mongo database
 const saveToDataBase = async (req, res) => {
 
-  //loading, reading and saving file details to database
   const parser = parse({columns: true, delimiter: ';'}, async function (err, records){
-    console.log(records);
 
       try {
           await BusinessData.create(records);
@@ -51,18 +50,51 @@ const saveToDataBase = async (req, res) => {
         }
   });
 
-  console.log('req.file (save database): ', req.file)
-
   req.file.originalname = 'myParkingLotData.csv'
 
   let pathToFile = path.join(__dirname, '..', 'csvData', 'csvFiles', `${req.file.filename}`)
 
   fs.createReadStream(pathToFile).pipe(parser);
+
+  res.status
+
+  // SENDING RESPONSE
+  res.status(201).json({
+    status: 'success',
+    message: 'CSV file contents successfully saved to database!',
+  });
 }
 
-exports.uploadCsvFile = upload.single('file');
+// getting all cars in a particular parking lot
+ const getAllCarsOnParkinglot = catchAsync(async (req, res, next) => {
 
+    let parkinglotId = req.params.id.toString();
+
+    let filter = {parkinglotId};
+    //if (req.params.tourId) filter = { tour: req.params.tourId };
+
+    const features = new APIFeatures(BusinessData.find(filter), req.query)
+      .filter()
+      .sort()
+      .limitFields()
+      .paginate();
+    // const doc = await features.query.explain();
+    const doc = await features.query;
+
+    // SEND RESPONSE
+    res.status(200).json({
+      status: 'success',
+      results: doc.length,
+      data: {
+        data: doc
+      }
+     
+    });
+  });
+
+exports.uploadCsvFile = upload.single('file');
 exports.saveToDataBase = saveToDataBase;
+exports.getAllCarsOnParkinglot = getAllCarsOnParkinglot;
 
 // exports.createCandidate = factory.createOne(Candidate)
 // exports.getCandidate = factory.getOne(Candidate, 'evaluations');

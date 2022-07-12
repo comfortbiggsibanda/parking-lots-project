@@ -1,13 +1,12 @@
 const express = require('express');
 const BusinessDataController = require('../controllers/businessDataController');
-const fileUpload  = require('express-fileupload')
+//const fileUpload  = require('express-fileupload')
 
 const router = express.Router();
 
-router.post('/upload', BusinessDataController.uploadCsvFile, BusinessDataController.saveToDataBase, (req, res) => {
+router.post('/upload', BusinessDataController.uploadCsvFile, BusinessDataController.saveToDataBase);
 
-    res.send('hi there')
-} );
+router.get('/parkinglots/:id/cars/', BusinessDataController.getAllCarsOnParkinglot)
 
 // router
 //   .route('/')
