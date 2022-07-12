@@ -1,6 +1,6 @@
 const express = require('express');
 const BusinessDataController = require('../controllers/businessDataController');
-const fileUpload = require('express-fileupload')
+const fileUpload  = require('express-fileupload')
 
 const router = express.Router();
 

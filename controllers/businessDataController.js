@@ -4,6 +4,7 @@ const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
+const fileUpload  = require('express-fileupload')
 
 
 const fs = require('fs'); 
@@ -50,7 +51,11 @@ const saveToDataBase = async (req, res) => {
         }
   });
 
-  let pathToFile = path.join(__dirname, '..', 'csvData', 'csvFiles', `${req.file.originalname}`)
+  console.log('req.file (save database): ', req.file)
+
+  req.file.originalname = 'myParkingLotData.csv'
+
+  let pathToFile = path.join(__dirname, '..', 'csvData', 'csvFiles', `${req.file.filename}`)
 
   fs.createReadStream(pathToFile).pipe(parser);
 }
