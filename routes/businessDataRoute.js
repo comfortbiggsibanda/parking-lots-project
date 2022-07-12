@@ -4,7 +4,7 @@ const fileUpload = require('express-fileupload')
 
 const router = express.Router();
 
-router.post('/upload', BusinessDataController.uploadCsvFile, (req, res) => {
+router.post('/upload', BusinessDataController.uploadCsvFile, BusinessDataController.saveToDataBase, (req, res) => {
 
     res.send('hi there')
 } );

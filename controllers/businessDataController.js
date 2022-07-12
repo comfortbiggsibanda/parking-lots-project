@@ -1,11 +1,10 @@
 const multer = require('multer');
-const sharp = require('sharp');
 const BusinessData = require('../models/businessDataModel');
-const CsvFile = require('../csvData/csvFileLoad');
+const path = require('path');
 const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const factory = require('./handlerFactory');
-//const fileUpload = require('express-fileupload')
+
 
 const fs = require('fs'); 
 const { parse } = require('csv-parse');
@@ -38,6 +37,7 @@ const upload = multer({
 
 
 const saveToDataBase = async (req, res) => {
+
   //loading, reading and saving file details to database
   const parser = parse({columns: true, delimiter: ';'}, async function (err, records){
     console.log(records);
@@ -50,10 +50,14 @@ const saveToDataBase = async (req, res) => {
         }
   });
 
-  fs.createReadStream(__dirname + `/csvData/csvFiles/${req.file.originalname}`).pipe(parser);
+  let pathToFile = path.join(__dirname, '..', 'csvData', 'csvFiles', `${req.file.originalname}`)
+
+  fs.createReadStream(pathToFile).pipe(parser);
 }
 
 exports.uploadCsvFile = upload.single('file');
+
+exports.saveToDataBase = saveToDataBase;
 
 // exports.createCandidate = factory.createOne(Candidate)
 // exports.getCandidate = factory.getOne(Candidate, 'evaluations');
