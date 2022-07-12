@@ -79,7 +79,7 @@ const saveToDataBase = async (req, res) => {
     {
       let hourDifference = timeElapsed - 3;
       discount *= hourDifference;
-      discountToCents = discount * 100;
+      discountToCents = (discount * 100).toFixed(2);
       totalCost = (timeElapsed * costPerHour) - discount;
     }
 
@@ -124,11 +124,21 @@ const saveToDataBase = async (req, res) => {
   {
     let hourDifference = timeElapsed - 3;
     discount *= hourDifference;
-    discountToCents = discount * 100;
+    discountToCents = (discount * 100).toFixed(2);
     totalCost = (timeElapsed * costPerHour) - discount;
   }
 
   await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
+
+  let inventory = await BusinessData.aggregate( [
+    {
+       $match: {}
+    },
+    
+    {
+       $group: { _id: "$value", value: { $sum: "$value" } }
+    }
+ ] )
 
   let filter = {};
 
@@ -143,9 +153,9 @@ const saveToDataBase = async (req, res) => {
   // SEND RESPONSE
   res.status(200).json({
     status: 'success',
-    results: doc.length,
+    totalAmountOfCars: doc.length,
     data: {
-      data: doc
+      data: inventory
     }
    
   });
