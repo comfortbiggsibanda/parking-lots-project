@@ -177,7 +177,21 @@ const saveToDataBase = async (req, res) => {
   });
 });
 
+
+//delete all business data
+const deleteAllData = catchAsync(async (req, res) => {
+  console.log('running')
+  await BusinessData.deleteMany();
+
+  // SEND RESPONSE
+  res.status(200).json({
+    status: 'success',
+    message: 'All business data successfully deleted!',
+  });
+});
+
 exports.uploadCsvFile = upload.single('file');
 exports.saveToDataBase = saveToDataBase;
 exports.getAllCarsOnParkinglot = getAllCarsOnParkinglot;
 exports.getInventory = getInventory;
+exports.deleteAllData = deleteAllData;

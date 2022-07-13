@@ -9,5 +9,7 @@ router.get('/parkinglots/:id/cars/:T', BusinessDataController.getAllCarsOnParkin
 
 router.get('/inventory/:T', BusinessDataController.getInventory)
 
+router.delete('/delete', BusinessDataController.deleteAllData)
+
 
 module.exports = router;
