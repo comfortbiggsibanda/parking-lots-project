@@ -5,7 +5,6 @@ const catchAsync = require('./../utils/catchAsync');
 const AppError = require('./../utils/appError');
 const APIFeatures = require('./../utils/apiFeatures');
 
-
 const fs = require('fs'); 
 const { parse } = require('csv-parse');
 
@@ -61,6 +60,7 @@ const saveToDataBase = async (req, res) => {
   });
 }
 
+
 // getting all cars in a particular parking lot
  const getAllCarsOnParkinglot = catchAsync(async (req, res, next) => {
 
@@ -80,15 +80,15 @@ const saveToDataBase = async (req, res) => {
     {
       let hourDifference = timeElapsed - 3;
       discount *= hourDifference;
-      discountToCents = (discount * 100).toFixed(2);
-      totalCost = (timeElapsed * costPerHour) - discount;
+      discountToCents = parseInt((discount * 100).toFixed(2));
+      totalCost = parseFloat(((timeElapsed * costPerHour) - discount).toFixed(2));
     }
 
     let filter = {parkinglotId};
 
     await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
 
-    const features = new APIFeatures(BusinessData.find(filter), req.query)
+    const features = new APIFeatures(BusinessData.find(filter).select('-parkinglotId'), req.query)
       .filter()
       .sort()
       .limitFields()
@@ -100,10 +100,7 @@ const saveToDataBase = async (req, res) => {
     res.status(200).json({
       status: 'success',
       results: doc.length,
-      data: {
-        data: doc
-      }
-     
+      data: doc
     });
   });
 
@@ -125,8 +122,8 @@ const saveToDataBase = async (req, res) => {
   {
     let hourDifference = timeElapsed - 3;
     discount *= hourDifference;
-    discountToCents = (discount * 100).toFixed(2);
-    totalCost = (timeElapsed * costPerHour) - discount;
+    discountToCents = parseInt((discount * 100).toFixed(2));
+    totalCost = parseFloat((timeElapsed * costPerHour) - discount);
   }
 
   await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
@@ -175,7 +172,6 @@ const saveToDataBase = async (req, res) => {
       totalAmountOfCars: doc.length,
       value: finalValue,
       discountInCents: finalDiscountInCents
-
     }
    
   });

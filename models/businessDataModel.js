@@ -39,7 +39,6 @@ const businessDataSchema = new mongoose.Schema({
   }
 );
 
-
 const BusinessData = mongoose.model('businessDataSchema', businessDataSchema);
 
 module.exports = BusinessData;
