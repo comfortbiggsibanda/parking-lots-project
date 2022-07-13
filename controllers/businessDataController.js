@@ -65,8 +65,9 @@ const saveToDataBase = async (req, res) => {
  const getAllCarsOnParkinglot = catchAsync(async (req, res, next) => {
 
     let parkinglotId = req.params.id.toString();
-    let timeElapsed = parseInt(req.params.T);
 
+    //simple algorithm to calculate total costs/values and discounts based on the time elapsed
+    let timeElapsed = parseInt(req.params.T);
     let costPerHour = 1.20;
     let discount = 0.10;
     let totalCost;
@@ -107,11 +108,11 @@ const saveToDataBase = async (req, res) => {
   });
 
 
-  // getting all the money a user is making across all parking lots
+ // getting all the money a user is making across all parking lots (inventory)
  const getInventory = catchAsync(async (req, res, next) => {
 
+  //simple algorithm to calculate total costs/values and discounts based on the time elapsed 
   let timeElapsed = parseInt(req.params.T);
-
   let costPerHour = 1.20;
   let discount = 0.10;
   let totalCost;
@@ -130,7 +131,9 @@ const saveToDataBase = async (req, res) => {
 
   await BusinessData.updateMany({}, {$set: {value: totalCost, discountInCents: discountToCents}})
 
-  let inventory = await BusinessData.aggregate( [
+
+  //aggregation to calculate total value inventory
+  let inventoryValue = await BusinessData.aggregate( [
     {
        $match: {}
     },
@@ -139,6 +142,17 @@ const saveToDataBase = async (req, res) => {
        $group: { _id: "$value", value: { $sum: "$value" } }
     }
  ] )
+
+//aggregation to calculate total discount inventory
+ let inventoryDiscountInCents = await BusinessData.aggregate( [
+  {
+     $match: {}
+  },
+  
+  {
+     $group: { _id: "$discountInCents", discountInCents: { $sum: "$discountInCents" } }
+  }
+] )
 
   let filter = {};
 
@@ -150,12 +164,18 @@ const saveToDataBase = async (req, res) => {
 
   const doc = await features.query;
 
+  //calculating and curating final values and discounts for total inventory
+  let finalValue = parseFloat(inventoryValue[0].value.toFixed(2));
+  let finalDiscountInCents = parseInt(inventoryDiscountInCents[0].discountInCents.toFixed(2));
+
   // SEND RESPONSE
   res.status(200).json({
     status: 'success',
-    totalAmountOfCars: doc.length,
     data: {
-      data: inventory
+      totalAmountOfCars: doc.length,
+      value: finalValue,
+      discountInCents: finalDiscountInCents
+
     }
    
   });
